@@ -1,0 +1,12 @@
+node_modules
+.env
+UTC--2022-01-16T21-46-08.521Z--0xd7f771ec4b3d6b0dc5333b08b0ef70520bb142df
+scratch/index_with_wallet.js
+scratch/gateway_origin.js
+scratch/dummy.js
+scratch/mqtt_test.js
+scratch/pseudocode.txt
+device1.js
+'Device 1'/node_modules
+'Device 2'/node_modules
+'Device 3'/node_modules

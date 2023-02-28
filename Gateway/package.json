@@ -1,0 +1,31 @@
+{
+  "name": "fyp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^2.0.0",
+    "@zilliqa-js/crypto": "^3.3.4",
+    "@zilliqa-js/zilliqa": "^3.3.4",
+    "async-mqtt": "^2.6.2",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^10.0.0",
+    "eccrypto": "^1.1.6",
+    "eciesjs": "^0.3.13",
+    "elliptic": "^6.5.4",
+    "ethereumjs-tx": "^2.1.2",
+    "express": "^4.17.2",
+    "mqtt": "^4.3.4",
+    "secp256k1": "^4.0.3",
+    "web3": "^1.6.1"
+  }
+}

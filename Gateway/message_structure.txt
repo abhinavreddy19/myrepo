@@ -1,0 +1,235 @@
+NOTE: Device listens on the topic : <device id>
+
+Potential changes:
+1. At the beginning of registration and auth, device may have to send a digital signature with timestamp.
+2. Gateway should always send the respose with a timestamp.
+
+Notes:
+1. In check_device(): We are not checking whether the gateway details.
+
+
+
+/****Message structure during registration****/
+/*
+1.Device to gateway
+->Registration request to topic gateway1/register
+Encrypted(gateway public key, {
+    devId: hash of the public key + gateway key
+    pub key:     
+    timestamp: Not yet implemented
+    sign: Not yet
+})
+2.Gateway to device: 
+->Gateway responds with the status on topic: <device id> 
+Encrypted(Device public key, {
+    remark: 'register'
+    status: bool value (true/false) 
+    timestamp: not yet
+    sign : not yet
+})
+*/
+
+/****Message structure during authentication****/
+/*
+1. From device to gateway:
+->Sends request for nonce on topic: gateway1/nonce
+Encrypted(Gateway public key, {
+    devId: hash of the public key + gateway key?
+    timestamp: TS0                  
+})
+    
+2. From gateway to device
+->Returns nonce along with gateway signature
+Encrypted(Device public key, {        
+    remark: 'nonce',
+    status: bool value -> indicates whether request was successful.
+    nonce: nonce for the device to sign
+    sign: {
+    r:,
+    s:,
+    recovery param:
+    }
+    time_stamp: time stamp with which gateway signed and created its signature       
+})
+
+3. From device to gateway:
+-> Sends signed nonce back on the topic: gateway1/auth
+Encrypted(Gateway public key, {
+    devId:     
+    signature: {
+        r:,
+        s:,
+        recovery param:
+    }
+})
+
+4. Gateway to device:
+->Responds with authentication status.
+Encrypted(Device public key, {
+    remark: 'auth'
+    status: 'true/false'
+    sign: {
+        r:,
+        s:,
+        recovery param:
+    },
+    time_stamp:
+})
+
+*/
+
+/****Message structure during registration****/
+/*
+1.Device to gateway
+->Registration request to topic gateway1/register
+Encrypted(gateway public key, {
+    devId: hash of the public key + gateway key
+    pub key:     
+    timestamp: Not yet implemented
+    sign: Not yet
+})
+2.Gateway to device: 
+->Gateway responds with the status on topic: <device id> 
+Encrypted(Device public key, {
+    remark: 'register'
+    status: bool value (true/false) 
+    timestamp: not yet
+    sign : not yet
+})
+*/
+
+/****Message structure during authentication****/
+/*
+1. From device to gateway:
+->Sends request for nonce on topic: gateway1/nonce
+Encrypted(Gateway public key, {
+    devId: hash of the public key + gateway key?
+    timestamp: TS0                  
+})
+    
+2. From gateway to device
+->Returns nonce along with gateway signature
+Encrypted(Device public key, {        
+    remark: 'nonce',
+    status: bool value -> indicates whether request was successful.
+    nonce: nonce for the device to sign
+    sign: {
+    r:,
+    s:,
+    recovery param:
+    }
+    time_stamp: time stamp with which gateway signed and created its signature       
+})
+
+3. From device to gateway:
+-> Sends signed nonce back on the topic: gateway1/auth
+Encrypted(Gateway public key, {
+    devId:     
+    signature: {
+        r:,
+        s:,
+        recovery param:
+    }
+    receiver devID:
+    message:
+})
+
+4. Gateway to device:
+->Responds with authentication status.
+Encrypted(Device public key, {
+    remark: 'auth'
+    status: 'true/false'
+    sign: {
+        r:,
+        s:,
+        recovery param:
+    },
+    time_stamp:
+})
+
+*/
+
+
+/****Message structure during communication (Similar to authentication)****/
+
+1. From device to gateway:
+->Sends request for nonce on topic: gateway1/nonce
+Encrypted(Gateway public key, {
+    devId: hash of the public key + gateway key
+    timestamp: TS0 
+    recipient device_id: ('null' if just for authentication)
+})
+
+2. From gateway to device
+->Returns nonce along with gateway signature
+Encrypted(Device public key, {        
+    remark: 'nonce',
+    status: bool value -> indicates whether request was successful.
+    nonce: nonce for the device to sign
+    recvKey: Public key of the recipient.
+    sign: {
+    r:,
+    s:,
+    recovery param:
+    }
+    time_stamp: time stamp with which gateway signed and created its signature       
+})
+
+3. From device to gateway:
+-> Sends signed hash of nonce and public key back on the topic: gateway1/auth
+Encrypted(Gateway public key, {
+    devId:     
+    signature: {
+        r:,
+        s:,
+        recovery param:
+    }    
+    msg: Message encrypted using receiver's public key
+})
+
+1. Then this gateway performs a transaction and places the message, under the messages for receiver gateway and devID.
+2. It emits an event through which the receiver gateway comes to know that it has received a message.
+3. Then the receiver gateway reads the message, and sends it to the respective device.
+Event structure: Receiver gateway address, receiver device id.
+
+4. Gateway to device:
+->Responds with authentication status.
+Encrypted(Device public key, {
+    remark: 'auth'
+    status: 'true/false'
+    sign: {
+        r:,
+        s:,
+        recovery param:
+    },
+    time_stamp:
+})
+
+
+Message structure while receiving messages:
+*Gateway to device:
+Encrypted(Device public key, {
+    remark: 'comm'    
+    sign: {
+        r:,
+        s:,
+        recovery param:
+    },
+    time_stamp:
+    devId: Senders devId
+    message: 
+})
+
+
+Steps to do now:
+On device side:
+1. Include the current values as the state value in Form-control.
+2. Include the recipient devID in 1st step of authentication.
+3. After receiving public key, hash the public key and the nonce, sign and send along with the message.
+4.
+
+On the gateway side.
+1. If the recipient id is blank then send only nonce else send public key along.
+2. If message is blank, then just authenticate with nonce, else authenticate with public key also
+3. Change the nonce after every request ie., in gateway1/auth.
+
