@@ -27,7 +27,7 @@ contract Sample {
     //Maps from the device id to device information which is contained in 'Device' struct.
     mapping(string => Device) dev_info;
     mapping(address => string[]) gate_dev;
-    
+    mapping(address => string[]) gate_agg;
 
     //The messsages associated with the gateway are stored in this data structure.
     struct Message {
@@ -89,71 +89,9 @@ contract Sample {
             return 0;
     }
     //device authentication
+    function deviceauth(string aggregateSignature,)
 
-    /* function recoverAddress(bytes32 messageHash, bytes memory sig) public pure returns (address) {
-    require(sig.length == 65, "Invalid signature length");
-
-    bytes32 r;
-    bytes32 s;
-    uint8 v;
-
-    assembly {
-        r := mload(add(sig, 32))
-        s := mload(add(sig, 64))
-        v := byte(0, mload(add(sig, 96)))
-    }
-
-    if (v < 27) {
-        v += 27;
-    }
-
-    require(v == 27 || v == 28, "Invalid signature recovery");
-
-    return ecrecover(messageHash, v, r, s);
-}
-
-function verifyAggregateSignature(bytes32 messageHash, bytes[] memory signatures) public pure returns (bool) {
-    uint256 n = signatures.length;
-
-    require(n > 0, "No signatures provided");
-
-    uint256 m = n / 2;
-    uint256 s = 0;
-
-    for (uint256 i = 0; i < n; i++) {
-        address signer = recoverAddress(messageHash, signatures[i]);
-        s |= uint256(uint160(signer)) << (i * 160);
-    }
-
-    bytes32 expectedHash = keccak256(abi.encodePacked(s));
-    return expectedHash == messageHash;
-}
-
-
-
-    bytes32 private constant MAGIC_VALUE = 0x11223344;
-    mapping (address => bool) private authorizedDevices;
-
-    function authenticateDevices(bytes memory[] sig, address[] memory deviceAddresses) public {
-        bytes32 message = keccak256(abi.encodePacked(MAGIC_VALUE, deviceAddresses));
-
-        // Verify the aggregate signature
-        bool result = verifyAggregateSignature(message, sig);
-
-        // If the aggregate signature is valid, authorize all devices
-        if (result) {
-            for (uint i = 0; i < deviceAddresses.length; i++) {
-                authorizedDevices[deviceAddresses[i]] = true;
-            }
-        }
-        return result;
-    }*/
-
-       function isAuthorized(address deviceAddress) public view returns (bool) {
-        return true;
-    }
-
-
+    
     function register_gateway(bytes memory signature) public {
         
         if(reg[msg.sender] == true)
@@ -198,7 +136,7 @@ function verifyAggregateSignature(bytes32 messageHash, bytes[] memory signatures
             //3. Map the device id to the created struct.
             dev_info[_devId] = dev;
 
-            //4. Also add the device id to the list of devices under the associated gatewyay.  
+            //4. Also add the device id to the list of devices under the associated gateway.  
             gate_dev[msg.sender].push(_devId);                                  
         }
     }

@@ -1,0 +1,14 @@
+properties of device:
+
+Device has to be registered to a AS. 
+steps for registering :
+1.device sends a request to ASnode via LBR(low border router)
+2.lbr then decrypts the request and send s
+functions required :
+encrypt()
+decrypt()
+signit()
+verify()
+
+
+
