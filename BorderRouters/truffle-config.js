@@ -3,7 +3,7 @@ module.exports = {
     development: {
       host: "127.0.0.1",
       port:8438,
-      network_id: "*", // Match any network id
+      network_id: "143", // Match any network id
     }
     //,
     // rinkeby: {

@@ -222,7 +222,7 @@ function App() {
 
   /***** This handler connects the device to the broker and subscribes to listen for responses *****/
 
-  // function respond_nonce(){
+  //   function respond_nonce(){
   //   console.log("Wait...");
   // }
 
@@ -508,7 +508,8 @@ function App() {
       registerClicked: false,
       authClicked: true,
     }));
-
+    //console.log("destdevice :",commStatus.devID);
+ 
     client.publish("gateway1/nonce", cipher_str);
   }
 
@@ -517,6 +518,7 @@ function App() {
       ...prev,
       devID: e.target.value,
     }));
+    
   }
 
   function onMsg(e) {
@@ -720,21 +722,21 @@ function App() {
             </Form.Group>
             <br></br>
             <Form.Group>
-              <Form.Label>Message</Form.Label>
+              {/* <Form.Label>Message</Form.Label> */}
               <Row>
-                <Form.Control
+                {/* <Form.Control
                   type="text"
                   placeholder="Message to send"
                   onChange={onMsg}
                   style={{ width: "80%" }}
-                />
+                /> */}
                 <Button
                   id="button6"
                   style={{ width: "100px" }}
                   onClick={handleAuth}
                   disabled={false}
                 >
-                  <span class="front">Send</span>
+                  <span class="front">Show Route</span>
                 </Button>
               </Row>
             </Form.Group>
@@ -743,23 +745,23 @@ function App() {
 
         {commStatus.comm_button_clicked ? (
           <div class="card1">
-            <p>Starting authenticated communication process</p>
+            <p>Starting authenticated routing process</p>
 
             <div class="card2">
-              <h5>Request from device to gateway</h5>
+              <h5>Request from device to lbr</h5>
               <p>Device ID: {keyPair.devId}</p>
               <p>
                 Timestamp of the request:{" "}
                 {authStatus.ts1 ? authStatus.ts1 : null}
               </p>
-              <p>
+               <p>
                 Receiver's device id:{" "}
                 {commStatus.devID ? commStatus.devID : null}
               </p>
               <p>
                 Cipher text:{" "}
                 {authStatus.ct1 ? authStatus.ct1.substring(0, 40) : null}
-              </p>
+              </p> 
             </div>
 
             <div class="card2">
@@ -792,10 +794,11 @@ function App() {
             <div class="card2">
               <h5>Device sending encrypted message with signed nonce</h5>
               <p>Device ID: {keyPair.devId}</p>
-              {authStatus.data && authStatus.data2 ? (
-                <div>
-                  <p>Nonce to be signed: {authStatus.data.nonce}</p>
+              <p>Nonce to be signed: {authStatus.data.nonce}</p>
                   <p>Recipient public key: {authStatus.data.recvKey}</p>
+              {/* {authStatus.data && authStatus.data2 ? (
+                <div>
+                  
                   <p>
                     Sending sample text message:{" "}
                     {authStatus.data2.msg.substring(0, 40) + "..."}
@@ -811,12 +814,12 @@ function App() {
               )}
               <p>
                 Cipher text:{" "}
-                {authStatus.ct2 ? authStatus.ct2.substring(0, 40) : null}
-              </p>
+                {authStatus.ct ? authStatus.ct.substring(0, 40) : null}
+              </p> */}
             </div>
 
             <div style={{ backgroundColor: "#d9f2de" }}>
-              {authStatus.res ? (
+              {authStatus.res=1 ? (
                 <p>Message sent!!</p>
               ) : (
                 <p>Sending failed...</p>
@@ -825,7 +828,7 @@ function App() {
           </div>
         ) : null}
 
-        {commStatus.comm_button_clicked ? (
+        {/* {commStatus.comm_button_clicked ? (
           <div class="card1">
             <h5>Messages</h5>
             <div>
@@ -851,7 +854,7 @@ function App() {
               )}
             </div>
           </div>
-        ) : null}
+        ) : null} */}
 
         {
           <Button

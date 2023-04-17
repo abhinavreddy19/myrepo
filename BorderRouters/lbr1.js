@@ -8,6 +8,7 @@ const ecies = require("eciesjs");
 const elliptic = require("elliptic");
 const sha3 = require("js-sha3");
 const { bls, privateKeyToPublicKey } = require("@zilliqa-js/crypto");
+const lbr1id="8080";
 
 // const { BN, Long, bytes, units } = require("@zilliqa-js/util");
 // const { Zilliqa } = require("@zilliqa-js/zilliqa");
@@ -296,6 +297,66 @@ sample.events
     let enc_data = encrypt(snd, pubKey);
     client.publish(eve.returnValues.devId, enc_data);
   });
+function bgprouting(graph, start, end) {
+  const distances = {};
+  const previous = {};
+  const nodes = new Set();
+  let path = [];
+
+  for (const node in graph) {
+    distances[node] = Infinity;
+    previous[node] = null;
+    nodes.add(node);
+  }
+
+  distances[start] = 0;
+
+  while (nodes.size > 0) {
+    let smallestNode = null;
+    for (const node of nodes) {
+      if (smallestNode === null || distances[node] < distances[smallestNode]) {
+        smallestNode = node;
+      }
+    }
+
+    if (smallestNode === end) {
+      while (previous[smallestNode]) {
+        path.push(smallestNode);
+        smallestNode = previous[smallestNode];
+      }
+      break;
+    }
+
+    nodes.delete(smallestNode);
+
+    for (const neighbor in graph[smallestNode]) {
+      const distance = distances[smallestNode] + graph[smallestNode][neighbor];
+
+      if (distance < distances[neighbor]) {
+        distances[neighbor] = distance;
+        previous[neighbor] = smallestNode;
+      }
+    }
+  }
+
+  return path.concat([start]).reverse();
+}
+
+const graph = {
+  "8080": {
+    "8081": 1,
+    "8082": 5
+  },
+  "8081": {
+    "8080": 1,
+    "8082": 2
+  },
+  "8082": {
+    "8080": 5,
+    "8081": 2
+  }
+};
+
 
 /***************Below are mqtt listeners for requests from devices*************/
 client.on("message", async (topic, rcv) => {
@@ -364,6 +425,7 @@ client.on("message", async (topic, rcv) => {
       let enc_data = encrypt(snd, data.pubKey);
       client.publish(data.devId, enc_data);
     }
+    
   } else if (topic === "gateway1/nonce") {
     /*
         This means the device is requesting the nonce for an authenticated request in the next step.        
@@ -374,11 +436,15 @@ client.on("message", async (topic, rcv) => {
       rcv.toString().substring(0, 40),
       "...\n"
     );
-    if (!data.recvId)
+    if (!data.recvId){
       data = {
         devId: data.devId,
         TS: data.TS,
       };
+    }
+    else{
+      console.log("Destination DeviceID :",data.recvId);
+    }
     console.log("Decrypted authentication request:  \n", data);
 
     //First check whether the device is registered or not.
@@ -433,7 +499,10 @@ client.on("message", async (topic, rcv) => {
         // console.log("Timestamp of the request: ", cur_dev_TS.toString())
         console.log("--Timestamp of the request updated--");
       }
-
+      if(data.devId){
+        //let destlbrid = await sample.methods.fetchaddress(data.devId).call({ from: process.env.address });
+        console.log(data.devId);
+      }
       if (data.recvId) {
         //Get the public key of the receiver and send it along with the nonce.
         let ans2 = await create_transaction(
@@ -447,13 +516,13 @@ client.on("message", async (topic, rcv) => {
             ans2.tx.rawTransaction
           );
         }
-        let recvKey = await sample.methods
-          .get_device_key(data.recvId)
-          .call({ from: process.env.address });
-        snd = {
-          ...snd,
-          recvKey: recvKey,
-        };
+        // let recvKey = await sample.methods
+        //   .get_device_key(data.recvId)
+        //   .call({ from: process.env.address });
+        // snd = {
+        //   ...snd,
+        //   recvKey: recvKey,
+        // };
       }
       console.log("Sending nonce for signing: \n", snd);
       let pubKey = await sample.methods
@@ -461,18 +530,40 @@ client.on("message", async (topic, rcv) => {
         .call({ from: process.env.address });
       let enc_data = encrypt(snd, pubKey);
       client.publish(data.devId, enc_data);
+      try{
+    const start = lbr1id;
+    console.log(data.devId);
+    let temp = await sample.methods.get_device_gateway(data.devId).call({ from: process.env.address });
+    var end=data.recvId;
+    var end_lbr;
+    if(temp){
+      console.log("yooyoyoy");
+      console.log(temp);
+      
+    }
+    console.log(bgprouting(graph, start, end));
+  }catch(error){
+    console.log(error);
+  }
     } else {
       console.log("Cannot retrieve nonce...");
       console.log("--Device not associated with lbr--");
       // console.log("Invalid gateway !!");
     }
-  } else if (topic == "gateway1/priv") {
+  } else if (topic === "gateway1/priv") {
     var data = decrypt(rcv);
     var data2 = data.privKey;
 
     devices.push(data.privKey);
     console.log(typeof data.privKey);
-  } else if (topic === "gateway1/auth") {
+  } else if(topic === "lbr1/destdevice"){
+    var data=decrypt(rcv);
+    var destdevID=data.destdevID;
+    end=destdevID;
+    console.log("Destination Device Id :", end);
+    
+  }
+  else if (topic === "gateway1/auth") {
     /**
         This means device is requesting for authentication or a communication request. 
         So it has to contain a signature and encrypted with this gateway's timestamp.               

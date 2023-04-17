@@ -7,7 +7,7 @@ contract Sample {
     /* 'number' and 'str' are test variables */
     uint public number = 10;
     string public str = "Hello";
-
+    uint public t=0;
     // 'reg' is mapping which stores whether a gateway has registered or not.
     mapping(address => bool) reg;
     // 'nonces' is a mapping which stores nonces for each registered gateway and changes with transaction.
@@ -23,13 +23,14 @@ contract Sample {
         string TS;
         string recvId;
     }
-
+    address[5] public lbrids;
     //Maps from the device id to device information which is contained in 'Device' struct.
     mapping(string => Device) dev_info;
+    
     mapping(address => string[]) gate_dev;
     mapping(address => string[]) gate_agg;
 
-    //The messsages associated with the gateway are stored in this data structure.
+    //The messsages associated with the lbr are stored in this data structure.
     struct Message {
         string from;
         string to;
@@ -89,7 +90,7 @@ contract Sample {
             return 0;
     }
     //device authentication
-    function deviceauth(string aggregateSignature,)
+    
 
     
     function register_gateway(bytes memory signature) public {
@@ -103,6 +104,8 @@ contract Sample {
             {
                 //That means the signature has been verified.
                 reg[msg.sender] = true;
+                lbrids[t]=msg.sender;
+                t++;
                 nonces[msg.sender] = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, block.number)))%10000;
             }        
             else
@@ -153,16 +156,29 @@ contract Sample {
         dev_info[_devId].TS = _TS;
         emit test("Timestamp updated...");
     }
-
+     
     function get_device_key(string memory _devId) public view returns(string memory){                
         return dev_info[_devId].pubKey;
+    }
+    function get_device_gateway(string memory _devId) public view returns(uint){                
+        address temp = dev_info[_devId].gate;
+        for(uint i=0;i<5;i++){
+            if(lbrids[i]==temp){
+                return i;
+            }
+        }
+        
     }
 
     function update_recipient(string memory _devId, string memory _recvId) public {
         dev_info[_devId].recvId = _recvId;
         emit test("Recipient updated...");
     }
+    //function to return lbrid for the device specified
+   
+        
 
+    
     function communicate(string memory _devId, string memory _msg) public {
         
         if(reg[msg.sender] != true)
