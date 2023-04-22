@@ -8,7 +8,7 @@ const ecies = require("eciesjs");
 const elliptic = require("elliptic");
 const sha3 = require("js-sha3");
 const { bls, privateKeyToPublicKey } = require("@zilliqa-js/crypto");
-const lbr1id="8080";
+const lbr1id = "8080";
 
 // const { BN, Long, bytes, units } = require("@zilliqa-js/util");
 // const { Zilliqa } = require("@zilliqa-js/zilliqa");
@@ -343,20 +343,19 @@ function bgprouting(graph, start, end) {
 }
 
 const graph = {
-  "8080": {
-    "8081": 1,
-    "8082": 5
+  8080: {
+    8081: 1,
+    8082: 5,
   },
-  "8081": {
-    "8080": 1,
-    "8082": 2
+  8081: {
+    8080: 1,
+    8082: 2,
   },
-  "8082": {
-    "8080": 5,
-    "8081": 2
-  }
+  8082: {
+    8080: 5,
+    8081: 2,
+  },
 };
-
 
 /***************Below are mqtt listeners for requests from devices*************/
 client.on("message", async (topic, rcv) => {
@@ -425,7 +424,6 @@ client.on("message", async (topic, rcv) => {
       let enc_data = encrypt(snd, data.pubKey);
       client.publish(data.devId, enc_data);
     }
-    
   } else if (topic === "gateway1/nonce") {
     /*
         This means the device is requesting the nonce for an authenticated request in the next step.        
@@ -436,14 +434,13 @@ client.on("message", async (topic, rcv) => {
       rcv.toString().substring(0, 40),
       "...\n"
     );
-    if (!data.recvId){
+    if (!data.recvId) {
       data = {
         devId: data.devId,
         TS: data.TS,
       };
-    }
-    else{
-      console.log("Destination DeviceID :",data.recvId);
+    } else {
+      console.log("Destination DeviceID :", data.recvId);
     }
     console.log("Decrypted authentication request:  \n", data);
 
@@ -499,7 +496,7 @@ client.on("message", async (topic, rcv) => {
         // console.log("Timestamp of the request: ", cur_dev_TS.toString())
         console.log("--Timestamp of the request updated--");
       }
-      if(data.devId){
+      if (data.devId) {
         //let destlbrid = await sample.methods.fetchaddress(data.devId).call({ from: process.env.address });
         console.log(data.devId);
       }
@@ -516,13 +513,13 @@ client.on("message", async (topic, rcv) => {
             ans2.tx.rawTransaction
           );
         }
-        // let recvKey = await sample.methods
-        //   .get_device_key(data.recvId)
-        //   .call({ from: process.env.address });
-        // snd = {
-        //   ...snd,
-        //   recvKey: recvKey,
-        // };
+        let recvKey = await sample.methods
+          .get_device_key(data.recvId)
+          .call({ from: process.env.address });
+        snd = {
+          ...snd,
+          recvKey: recvKey,
+        };
       }
       console.log("Sending nonce for signing: \n", snd);
       let pubKey = await sample.methods
@@ -530,21 +527,22 @@ client.on("message", async (topic, rcv) => {
         .call({ from: process.env.address });
       let enc_data = encrypt(snd, pubKey);
       client.publish(data.devId, enc_data);
-      try{
-    const start = lbr1id;
-    console.log(data.devId);
-    let temp = await sample.methods.get_device_gateway(data.devId).call({ from: process.env.address });
-    var end=data.recvId;
-    var end_lbr;
-    if(temp){
-      console.log("yooyoyoy");
-      console.log(temp);
-      
-    }
-    console.log(bgprouting(graph, start, end));
-  }catch(error){
-    console.log(error);
-  }
+      try {
+        const start = lbr1id;
+        console.log(data.devId);
+        let temp = await sample.methods
+          .get_device_gateway(data.devId)
+          .call({ from: process.env.address });
+        var end = data.recvId;
+        var end_lbr;
+        if (temp) {
+          console.log("yooyoyoy");
+          console.log(temp);
+        }
+        console.log(bgprouting(graph, start, end));
+      } catch (error) {
+        console.log(error);
+      }
     } else {
       console.log("Cannot retrieve nonce...");
       console.log("--Device not associated with lbr--");
@@ -556,14 +554,12 @@ client.on("message", async (topic, rcv) => {
 
     devices.push(data.privKey);
     console.log(typeof data.privKey);
-  } else if(topic === "lbr1/destdevice"){
-    var data=decrypt(rcv);
-    var destdevID=data.destdevID;
-    end=destdevID;
+  } else if (topic === "lbr1/destdevice") {
+    var data = decrypt(rcv);
+    var destdevID = data.destdevID;
+    end = destdevID;
     console.log("Destination Device Id :", end);
-    
-  }
-  else if (topic === "gateway1/auth") {
+  } else if (topic === "gateway1/auth") {
     /**
         This means device is requesting for authentication or a communication request. 
         So it has to contain a signature and encrypted with this gateway's timestamp.               

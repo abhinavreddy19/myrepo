@@ -2,9 +2,7 @@
   background-color: #61dafb;
 }
 
-
 .App {
-
   margin: 100px;
   pardding: 10px;
   display: flex;
@@ -12,7 +10,6 @@
   margin-top: 0px;
   margin-left: inherit;
   margin-right: inherit;
-
 }
 
 .button,
@@ -25,12 +22,14 @@
   /* background-color: hsl(0, 20%, 40%); */
   width: 200px;
   border: 3px groove rgba(27, 31, 35, 0.15);
-  box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
+  box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0,
+    rgba(255, 255, 255, 0.25) 0 1px 0 inset;
   box-sizing: border-box;
   color: black;
   cursor: pointer;
   display: inline-block;
-  font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   font-size: 14px;
   font-weight: 900;
   line-height: 20px;
@@ -51,7 +50,6 @@
   font-weight: 500;
   overflow: visible;
   /* flex-direction: left; */
-
 }
 
 .front:hover {
@@ -64,10 +62,9 @@
 .buttons {
   display: flex;
   flex-direction: column;
-  /* margin: auto; */
   margin-top: 200px;
   float: left;
-  /* width: 50%; */
+  width: auto;
 }
 
 .vertical {
@@ -79,11 +76,7 @@
 }
 
 .cards {
-  /* float: left; */
-  display: flex;
-  flex-direction: left;
-  width: 100%;
-
+  width: 65%;
 }
 
 .parent {
@@ -91,9 +84,9 @@
   flex-direction: left;
 }
 
-
 .front {
-  box-shadow: rgba(27, 31, 35, 0.75) 0 5px 0, rgba(5, 200, 255, 0.30) 0 1px 0 inset;
+  box-shadow: rgba(27, 31, 35, 0.75) 0 5px 0,
+    rgba(5, 200, 255, 0.3) 0 1px 0 inset;
   display: block;
   border-radius: 12px;
   padding: 12px 42px;
@@ -103,25 +96,24 @@
   border: 0.05px outset black;
 }
 
-
 .button:active .front {
   transform: translateY(-2px);
 }
 
-
-
-
 .page-header {
   color: black;
   background-color: white;
-  font-family: Retina, Arial, Helvetica, sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: Retina, Arial, Helvetica, sans-serif, -apple-system, system-ui,
+    "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji";
   font-size: 7em;
   font-weight: 100;
   /* width: 100%; */
   /* text-align: center; */
   padding: 8px;
   margin-top: 2px;
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.1);
   letter-spacing: 2px;
   border: 2px;
   /* float:left; */
@@ -135,10 +127,9 @@
   margin-right: 20px;
 }
 
-
 .page-header h1 {
   /* text-indent: -100px; */
-  letter-spacing: .1em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -150,20 +141,20 @@
   margin-right: 20px;
 }
 
-
 #img123 {
   margin: auto;
 }
 
-
 .card1 {
   border-radius: 50px;
-  box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(200, 200, 200, 0.25) 0 1px 0 inset;
+  box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0,
+    rgba(200, 200, 200, 0.25) 0 1px 0 inset;
   box-sizing: border-box;
   /* width:700px; */
   height: 700px;
   color: black;
-  font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
@@ -185,12 +176,14 @@
 
 .card2 {
   border-radius: 50px;
-  box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(200, 200, 200, 0.25) 0 1px 0 inset;
+  box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0,
+    rgba(200, 200, 200, 0.25) 0 1px 0 inset;
   box-sizing: border-box;
   width: 700px;
   height: auto;
   color: black;
-  font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
@@ -207,29 +200,20 @@
   padding: 10px;
 }
 
-
-
 .card1:hover {
   box-shadow: 0px 0px 2px 2px black;
   border-radius: 50px;
 }
 
-
-
 .card2 {
   border-radius: 6px;
-
 }
-
 
 .card {
   width: 80%;
   margin: 20px auto;
   text-align: center;
 }
-
-
-
 
 .highlight-1 {
   background-color: #fcfbde;
@@ -238,7 +222,6 @@
 .highlight-2 {
   background-color: #d9f2de;
 }
-
 
 /* The container for the entire page */
 .container {
@@ -286,7 +269,6 @@
 
 /* The card */
 .card {
-
   background-color: white;
   margin: 20px;
   box-shadow: 0px 0px 5px 5px black;
@@ -338,7 +320,6 @@
   color: black;
 }
 
-
 .form {
   display: none;
   background-color: white;
@@ -387,7 +368,52 @@
   display: block !important;
 }
 
-
 #button5 {
   margin-top: 30px;
+}
+
+.recipientID {
+  top: 100px;
+  width: 170px;
+  margin-top: 200px;
+}
+
+.cards h1,
+h2,
+h3,
+h4,
+h5,
+p {
+  transition: 0.5s ease;
+}
+
+/* test */
+
+span {
+  display: inline-block;
+  overflow: hidden;
+  animation: 0.3s swift-up ease-in-out forwards;
+}
+i {
+  font-style: normal;
+  position: relative;
+  top: var(--headingSize);
+  animation: 0.5s swift-up ease-in-out forwards;
+}
+
+@keyframes swift-up {
+  to {
+    top: 0;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .container {
+    width: auto;
+    margin: 0 10%;
+  }
+
+  :root {
+    --headingSize: 35px;
+  }
 }

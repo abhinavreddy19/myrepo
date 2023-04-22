@@ -119,6 +119,10 @@ function App() {
   });
 
   const [toggle, setToggle] = useState(false);
+  const [showRoute, setShowRoute] = useState({
+    showRoute_button_clicked: false,
+    data: "this is KSH"
+  });
 
   //This state stores the status of the device.
   const [status, setStatus] = useState({
@@ -161,6 +165,7 @@ function App() {
     startClicked: false,
     registerClicked: false,
     authClicked: false,
+    showRouteClicked: false,
     data: null,
   });
 
@@ -210,6 +215,7 @@ function App() {
       startClicked: false,
       registerClicked: false,
       authClicked: false,
+      showRouteClicked: false
     }));
 
     let dat = new Date("2000-01-01");
@@ -239,6 +245,7 @@ function App() {
       startClicked: true,
       registerClicked: false,
       authClicked: false,
+      showRouteClicked: false
     }));
 
     client = mqtt.connect("mqtt://test.mosquitto.org:8081", {
@@ -464,6 +471,7 @@ function App() {
       startClicked: false,
       registerClicked: true,
       authClicked: false,
+      showRouteClicked: false
     }));
 
     client.publish("gateway1/register", cipher_str);
@@ -507,18 +515,40 @@ function App() {
       startClicked: false,
       registerClicked: false,
       authClicked: true,
+      showRouteClicked: false
     }));
     //console.log("destdevice :",commStatus.devID);
- 
+
     client.publish("gateway1/nonce", cipher_str);
   }
 
+  function handleShowRoute() {
+    setButton((prev) => ({
+      ...prev,
+      keysClicked: false,
+      startClicked: false,
+      registerClicked: false,
+      authClicked: false,
+      showRouteClicked: true
+    }));
+    setComm((prev) => ({
+      ...prev,
+      comm_button_clicked: commStatus.devID.length !== 0,
+    }));
+    return;
+  }
+
   function onDevId(e) {
+    const inputValue = e.target.value;
+    if (inputValue.trim() === "") {
+      console.log("Input value is empty");
+    } else {
+      console.log("Input value is not empty");
+    }
     setComm((prev) => ({
       ...prev,
       devID: e.target.value,
     }));
-    
   }
 
   function onMsg(e) {
@@ -566,9 +596,10 @@ function App() {
           {!buttonStatus.keysClicked &&
           !buttonStatus.startClicked &&
           !buttonStatus.registerClicked &&
-          !buttonStatus.authClicked ? (
+          !buttonStatus.authClicked &&
+          !buttonStatus.showRouteClicked ? (
             <div class="card1">
-              <h3> >> Hi, Welcome to BGP simulation </h3>
+              <h3 className = "swift-up-text"> Hi, Welcome to BGP simulation </h3>
             </div>
           ) : (
             <>{/* {console.log("Key pair not generated...")} */}</>
@@ -576,11 +607,11 @@ function App() {
 
           {buttonStatus.keysClicked && keyPair.privKey ? (
             <div class="card1">
-              <h4> >> Keys </h4>
+              <h4 class = "swift-up-text"> >> Keys </h4>
 
-              <p>Device Id: {keyPair.devId}</p>
-              <p>Public key: {keyPair.pubKey}</p>
-              <p>Private key: {keyPair.privKey}</p>
+              <p class = "swift-up-text">Device Id: {keyPair.devId}</p>
+              <p class = "swift-up-text">Public key: {keyPair.pubKey}</p>
+              <p class = "swift-up-text">Private key: {keyPair.privKey}</p>
             </div>
           ) : (
             <>{/* {console.log("Key pair not generated...")} */}</>
@@ -694,178 +725,100 @@ function App() {
             }
             <p>Cipher text: {(authStatus.ct2) ? authStatus.ct2.substring(0,40) : null}</p>
           </div> */}
+              {authStatus.res1 ? (
+                <div class="card2">
+                  {!authStatus.res ? (
+                    <h5>Authentication successful!!</h5>
+                  ) : (
+                    <h5>Authentication failed :(</h5>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {buttonStatus.showRouteClicked && commStatus.comm_button_clicked ? (
+            <div class="card1">
+              <p>Starting authenticated routing process</p>
 
               <div class="card2">
-                {!authStatus.res ? (
-                  <h5>Authentication successful!! :)</h5>
+                <h5>Request from device to lbr</h5>
+                <p>Device ID: {keyPair.devId}</p>
+                <p>
+                  Timestamp of the request:{" "}
+                  {authStatus.ts1 ? authStatus.ts1 : null}
+                </p>
+                <p>
+                  Receiver's device id:{" "}
+                  {commStatus.devID ? commStatus.devID : null}
+                </p>
+                <p>
+                  Cipher text:{" "}
+                  {authStatus.ct1 ? authStatus.ct1.substring(0, 40) : null}
+                </p>
+              </div>
+
+              <div class="card2">
+                <h5>Gateway response</h5>
+                <p>
+                  Received cipher text:{" "}
+                  {authStatus.res1 ? (
+                    authStatus.res1.substring(0, 40)
+                  ) : (
+                    <>Waiting...</>
+                  )}
+                </p>
+                <p>After decrypting: </p>
+                {authStatus.data ? (
+                  <div>
+                    <p>
+                      Timestamp of the response: {authStatus.data.time_stamp}
+                    </p>
+                    <p>
+                      Signature (r, s): ( r:{" "}
+                      {authStatus.data.sign.r.substring(0, 40)}, s:{" "}
+                      {authStatus.data.sign.s.substring(0, 40)} )
+                    </p>
+                    <p>Nonce received: {authStatus.data.nonce}</p>
+                    {authStatus.data.recvKey &&
+                    authStatus.data.recvKey.length > 0 ? (
+                      <p>Receiver public key: {authStatus.data.recvKey}</p>
+                    ) : (
+                      "Error! Receiver is not registered!!"
+                    )}
+                  </div>
                 ) : (
-                  <h5>Authentication failed :(</h5>
+                  <p>Waiting...</p>
                 )}
               </div>
             </div>
           ) : null}
+
+
         </div>
 
         {
-          <div style={{ width: "50%" }}>
-            <Form.Group>
-              <Form.Label>Recipient deviceID: </Form.Label>
-              <Row>
-                <Form.Control
-                  type="text"
-                  placeholder="deviceID"
-                  onChange={onDevId}
-                  value={commStatus.devID}
-                  style={{ width: "80%" }}
-                />
-              </Row>
-            </Form.Group>
+          <div class="card3">
+            <div className="recipientID">
+              <p>Recipient deviceID: </p>
+              <input
+                type="text"
+                placeholder="deviceID"
+                onChange={onDevId}
+                value={commStatus.devID}
+              />
+            </div>
             <br></br>
-            <Form.Group>
-              {/* <Form.Label>Message</Form.Label> */}
-              <Row>
-                {/* <Form.Control
-                  type="text"
-                  placeholder="Message to send"
-                  onChange={onMsg}
-                  style={{ width: "80%" }}
-                /> */}
-                <Button
-                  id="button6"
-                  style={{ width: "100px" }}
-                  onClick={handleAuth}
-                  disabled={false}
-                >
-                  <span class="front">Show Route</span>
-                </Button>
-              </Row>
-            </Form.Group>
+
+            <Button
+              id="button6"
+              style={{ width: "100px" }}
+              onClick={handleShowRoute}
+              disabled={false}
+            >
+              <span class="front">Show Route</span>
+            </Button>
           </div>
-        }
-
-        {commStatus.comm_button_clicked ? (
-          <div class="card1">
-            <p>Starting authenticated routing process</p>
-
-            <div class="card2">
-              <h5>Request from device to lbr</h5>
-              <p>Device ID: {keyPair.devId}</p>
-              <p>
-                Timestamp of the request:{" "}
-                {authStatus.ts1 ? authStatus.ts1 : null}
-              </p>
-               <p>
-                Receiver's device id:{" "}
-                {commStatus.devID ? commStatus.devID : null}
-              </p>
-              <p>
-                Cipher text:{" "}
-                {authStatus.ct1 ? authStatus.ct1.substring(0, 40) : null}
-              </p> 
-            </div>
-
-            <div class="card2">
-              <h5>Gateway response</h5>
-              <p>
-                Received cipher text:{" "}
-                {authStatus.res1 ? (
-                  authStatus.res1.substring(0, 40)
-                ) : (
-                  <>Waiting...</>
-                )}
-              </p>
-              <p>After decrypting: </p>
-              {authStatus.data ? (
-                <div>
-                  <p>Timestamp of the response: {authStatus.data.time_stamp}</p>
-                  <p>
-                    Signature (r, s): ( r:{" "}
-                    {authStatus.data.sign.r.substring(0, 40)}, s:{" "}
-                    {authStatus.data.sign.s.substring(0, 40)} )
-                  </p>
-                  <p>Nonce received: {authStatus.data.nonce}</p>
-                  <p>Receiver public key: {authStatus.data.recvKey}</p>
-                </div>
-              ) : (
-                <p>Waiting...</p>
-              )}
-            </div>
-
-            <div class="card2">
-              <h5>Device sending encrypted message with signed nonce</h5>
-              <p>Device ID: {keyPair.devId}</p>
-              <p>Nonce to be signed: {authStatus.data.nonce}</p>
-                  <p>Recipient public key: {authStatus.data.recvKey}</p>
-              {/* {authStatus.data && authStatus.data2 ? (
-                <div>
-                  
-                  <p>
-                    Sending sample text message:{" "}
-                    {authStatus.data2.msg.substring(0, 40) + "..."}
-                  </p>
-                  <p>
-                    Device signature(r, s): ( r:{" "}
-                    {authStatus.data2.sign.r.substring(0, 40)}, s:{" "}
-                    {authStatus.data2.sign.s.substring(0, 40)} )
-                  </p>
-                </div>
-              ) : (
-                <p>Preparing response</p>
-              )}
-              <p>
-                Cipher text:{" "}
-                {authStatus.ct ? authStatus.ct.substring(0, 40) : null}
-              </p> */}
-            </div>
-
-            <div style={{ backgroundColor: "#d9f2de" }}>
-              {authStatus.res=1 ? (
-                <p>Message sent!!</p>
-              ) : (
-                <p>Sending failed...</p>
-              )}
-            </div>
-          </div>
-        ) : null}
-
-        {/* {commStatus.comm_button_clicked ? (
-          <div class="card1">
-            <h5>Messages</h5>
-            <div>
-              <p>
-                Received cipher text:{" "}
-                {commStatus.res ? commStatus.res.substring(0, 40) : <>...</>}
-              </p>
-              <p>After decrypting:</p>
-              {commStatus.data ? (
-                <div>
-                  <p>Timestamp: {commStatus.data.time_stamp}</p>
-                  <p>
-                    Signature (r, s): ( r:{" "}
-                    {commStatus.data.sign.r.substring(0, 40)}, s:{" "}
-                    {commStatus.data.sign.s.substring(0, 40)} )
-                  </p>
-                  <p>Received from: {commStatus.data.from}</p>
-                  <p>Encrypted message received: {commStatus.enc}</p>
-                  <p>Message: {commStatus.msg}</p>
-                </div>
-              ) : (
-                <p>...</p>
-              )}
-            </div>
-          </div>
-        ) : null} */}
-
-        {
-          <Button
-            id="button5"
-            onClick={() => {
-              console.log("Present msg: ", localStorage.getItem("msg"));
-              console.log("commStatus: ", commStatus.comm_button_clicked);
-            }}
-          >
-            <span class="front">Print</span>
-          </Button>
         }
       </div>
       <img src={desktopMonitor} id="img123" width="800" height="80" />
