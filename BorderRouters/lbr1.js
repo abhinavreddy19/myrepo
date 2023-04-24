@@ -501,7 +501,7 @@ client.on("message", async (topic, rcv) => {
     //nonce is returned as 0 if either gateway is not registered or device is not under this gateway.
     console.log("Retrieving device data...");
     //need to make chnages here for authenticating devices
-    let nonce = 1; //await sample.methods.verifyAggregatedSignature(msg,aggregateSignatures,devids,devpubkeys).call({ from: process.env.address });
+    let nonce =1890; //await sample.methods.verifyAggregatedSignature(msg,aggregateSignatures,devids,devpubkeys).call({ from: process.env.address });
     if (nonce !== "0") {
       //If the device is registered then return the nonce.
       snd = {
