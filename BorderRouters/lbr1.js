@@ -20,7 +20,7 @@ console.log("zzzzzz");
 // console.log(JSON.stringify(zilliqa.crypto));
 const client = mqtt.connect("mqtt://test.mosquitto.org");
 
-const URL = "ws://127.0.0.1:8438";
+const URL = "ws://127.0.0.1:9091";
 const web3 = new Web3(URL);
 const { Transaction } = require("ethereumjs-tx");
 
@@ -29,7 +29,7 @@ const ec = new elliptic.ec("secp256k1");
 //Provide the abi and address of the smart contract to get it's object
 const sample = new web3.eth.Contract(
   Sample.abi,
-  Sample.networks["143"].address
+  Sample.networks["343"].address
 );
 // Now we can use this contract instance to call methods, send transactions, etc.
 
@@ -346,16 +346,42 @@ const graph = {
   8080: {
     8081: 1,
     8082: 5,
+    8083: 2,
+    8084: 3
   },
   8081: {
     8080: 1,
     8082: 2,
+    8083: 2,
+    8084: 1
   },
   8082: {
     8080: 5,
     8081: 2,
+    8083: 3,
+    8084: 1
   },
+  8083: {
+    8080: 2,
+    8081: 1,
+    8082: 2,
+    8084: 4
+  },
+  8084: {
+    8080: 3,
+    8081: 1,
+    8082: 2,
+    8083: 2
+  }
 };
+
+const graphMapping = {
+  '0xd7F771ec4b3d6B0dC5333b08b0EF70520bb142DF': '8080',
+  '0x01461224c32268E68f7F2D62578e726C4f7f01A0': '8081',
+  '0x5a1Cd5f40d9b7d3Dd9cAd1d87F43a8b63628B740': '8082',
+  '0x43fE8474C66C04754Dd5d841E60f31d4858D0785': '8083',
+  '0x1906F8b95539DE38262b5aadDd0f334d3a1eE096': '8084'
+}
 
 /***************Below are mqtt listeners for requests from devices*************/
 client.on("message", async (topic, rcv) => {
@@ -529,19 +555,56 @@ client.on("message", async (topic, rcv) => {
       client.publish(data.devId, enc_data);
       try {
         const start = lbr1id;
-        console.log(data.devId);
-        let temp = await sample.methods
-          .get_device_gateway(data.devId)
-          .call({ from: process.env.address });
-        var end = data.recvId;
-        var end_lbr;
-        if (temp) {
-          console.log("yooyoyoy");
-          console.log(temp);
+        console.log("source device id :",data.devId);
+        let flag=await sample.methods.check_device(data.recvId).call({from: process.env.address});
+        if(flag==""){
+          console.log("!!!!!!!!!!!!!!!!!!warning!!!!!!!!!!!!!!!!");
+          console.log("BGP hijacking attack detected");
+          console.log("Device not registered-------False Ip detected");
         }
-        console.log(bgprouting(graph, start, end));
+        else{
+          
+        let temp = await sample.methods
+           .get_device_gateway(data.recvId)
+           .call({ from: process.env.address });
+        
+        console.log("Recepient Device is under the BorderRouter :",temp);
+        console.log("lbrid :",graphMapping[temp]);
+        var end = graphMapping[temp];
+        let route=bgprouting(graph,start,end);
+        console.log("Path :",route);
+       
+        //client.publish(data.devId,route);
+        console.log("validating Route...........");
+        let flag=0;
+        function getKeysByValue(value) {
+          for (const key in graphMapping) {
+            if (graphMapping[key] === value) {
+              return key;
+            }
+          }
+          return "";
+        }
+        let isvalid="";
+        for(let i=0;i<=4;i++){
+            console.log("going");
+            let id=getKeysByValue(route[i]);
+            console.log(id);
+            isvalid=await sample.methods.check_device(id).call({from: process.env.address});
+
+            if(isvalid==""){
+              console.log("lbr with id :",id," is not registered");
+              console.log("Route is compromised with a malicious router in between.......");
+              console.log("Route is invalid........aborting the transfer!");
+              break;
+            }
+        }
+        if(isvalid){
+          console.log("Route Validation Successful :)");
+        }
+      }
       } catch (error) {
-        console.log(error);
+        
       }
     } else {
       console.log("Cannot retrieve nonce...");
@@ -554,78 +617,6 @@ client.on("message", async (topic, rcv) => {
 
     devices.push(data.privKey);
     console.log(typeof data.privKey);
-  } else if (topic === "lbr1/destdevice") {
-    var data = decrypt(rcv);
-    var destdevID = data.destdevID;
-    end = destdevID;
-    console.log("Destination Device Id :", end);
-  } else if (topic === "gateway1/auth") {
-    /**
-        This means device is requesting for authentication or a communication request. 
-        So it has to contain a signature and encrypted with this gateway's timestamp.               
-        */
-    var data = decrypt(rcv);
-    console.log("Signed nonce received: \n", data);
-
-    //Verify the message and then process the request.
-    let nonce = await sample.methods
-      .get_device_nonce(data.devId)
-      .call({ from: process.env.address });
-    console.log(nonce);
-    if (nonce === 0) console.log("Invalid gateway !!");
-    let pubKey = await sample.methods
-      .get_device_key(data.devId)
-      .call({ from: process.env.address });
-
-    let pubKeyObj = ec.keyFromPublic(pubKey, "hex");
-    let msgHash = sha3.keccak256(nonce);
-
-    /* Verify the signature along with the hash */
-    console.log("Retrieving device information from blockchain...");
-    console.log("Stored nonce: ", nonce);
-    console.log("Stored device public key: ", pubKey);
-    let auth_status = pubKeyObj.verify(msgHash, data.sign);
-    if (auth_status) console.log("--Device authentication successful--");
-    else console.log("--Device authentication failed--");
-    let curCount = await web3.eth.getTransactionCount(process.env.address);
-
-    if (
-      data.msg.length !== 0 &&
-      (auth_status || !txCount || curCount > txCount)
-    ) {
-      //That means the msg is stored in the blockchain and receiver is notifed.
-      let ans = await create_transaction(
-        sample.methods.communicate,
-        "Message communication",
-        [data.devId, data.msg]
-      );
-      if (!ans.error) {
-        var receipt = await web3.eth.sendSignedTransaction(
-          ans.tx.rawTransaction
-        );
-        receipt = {
-          ...receipt,
-          logsBloom: "",
-        };
-        console.log("Transaction created: \n", receipt);
-        console.log("--Message sent--");
-      }
-    }
-
-    //Prepare a response with latest timestamp
-    let date_obj = new Date();
-    let time_stamp = date_obj.toString();
-    let sign = sign_it(time_stamp);
-    let snd = {
-      remark: "auth",
-      sign: sign,
-      time_stamp: time_stamp,
-      status: auth_status,
-    };
-
-    let enc_data = encrypt(snd, pubKey);
-    client.publish(data.devId, enc_data);
-    // console.log("Auth response sent !!");
-  }
+  }  
 });
 console.log("test");

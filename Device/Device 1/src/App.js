@@ -518,6 +518,7 @@ function App() {
       showRouteClicked: false
     }));
     //console.log("destdevice :",commStatus.devID);
+    
 
     client.publish("gateway1/nonce", cipher_str);
   }
@@ -549,6 +550,7 @@ function App() {
       ...prev,
       devID: e.target.value,
     }));
+      
   }
 
   function onMsg(e) {
@@ -737,7 +739,7 @@ function App() {
             </div>
           ) : null}
 
-          {buttonStatus.showRouteClicked && commStatus.comm_button_clicked ? (
+          {commStatus.comm_button_clicked ? (
             <div class="card1">
               <p>Starting authenticated routing process</p>
 
@@ -813,7 +815,7 @@ function App() {
             <Button
               id="button6"
               style={{ width: "100px" }}
-              onClick={handleShowRoute}
+              onClick={handleAuth}
               disabled={false}
             >
               <span class="front">Show Route</span>

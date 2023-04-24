@@ -22,7 +22,9 @@ contract Sample {
         uint nonce;
         string TS;
         string recvId;
+        uint id;
     }
+     
     address[5] public lbrids;
     //Maps from the device id to device information which is contained in 'Device' struct.
     mapping(string => Device) dev_info;
@@ -114,7 +116,7 @@ contract Sample {
             }
         }
     }
-
+    uint public count=8080;
     function register_device(string memory _devId, string memory _pub, string memory _TS) public {
         
         if(dev_reg[_devId] == true)
@@ -136,6 +138,8 @@ contract Sample {
             dev.nonce = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, block.number)))%10000;
             dev.TS = _TS;
             dev.recvId = "";
+            dev.id=count;
+            count++;
             //3. Map the device id to the created struct.
             dev_info[_devId] = dev;
 
@@ -156,18 +160,40 @@ contract Sample {
         dev_info[_devId].TS = _TS;
         emit test("Timestamp updated...");
     }
-     
+    function verifyroute(address lbrid) public view returns(bool){
+        return reg[lbrid];
+    } 
+    struct info{
+        string pubKey;
+        address lbrinfo;
+    }
     function get_device_key(string memory _devId) public view returns(string memory){                
         return dev_info[_devId].pubKey;
     }
-    function get_device_gateway(string memory _devId) public view returns(uint){                
-        address temp = dev_info[_devId].gate;
-        for(uint i=0;i<5;i++){
-            if(lbrids[i]==temp){
-                return i;
+    function get_device_gateway(string memory _devId) public view returns(address){ 
+        return dev_info[_devId].gate;
+        
+    }
+    function get_lbr_id(address gate) public view returns(uint){
+        uint i=0;
+        for(i=0;i<=4;i++){
+            if(lbrids[i]==gate){
+                return i+8080;
             }
         }
-        
+        return 0;
+    }
+    function addressToString(address _addr) internal pure returns (string memory) {
+        bytes32 value = bytes32(uint256(uint160(_addr)));
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str2 = new bytes(42);
+        str2[0] = '0';
+        str2[2] = 'x';
+        for(uint i=0; i< 20; i++) {
+            str2[2+i*2] = alphabet[uint(uint8(value[i+12] >> 4))];
+            str2[3+i*2] = alphabet[uint(uint8(value[i+12] & 0x0f))];
+        }
+        return string(str2);
     }
 
     function update_recipient(string memory _devId, string memory _recvId) public {
