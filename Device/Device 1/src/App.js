@@ -110,6 +110,7 @@ function verify(signature, pubK) {
 }
 /******************COMPONENT FUNCTION***********************/
 function App() {
+  
   /***************INITILIAZING STATES********************/
   //Set of keys
   const [keyPair, setKeyPair] = useState({

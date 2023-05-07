@@ -155,6 +155,12 @@ contract Sample {
         else
             return "";
     }
+    function check_lbr(address lbrid) public view returns(uint){
+        if(reg[lbrid]){
+            return 1;
+        }
+        return 0;
+    }
 
     function update_timestamp(string memory _devId, string memory _TS) public {
         dev_info[_devId].TS = _TS;

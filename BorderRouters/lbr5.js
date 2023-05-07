@@ -19,7 +19,7 @@ console.log("zzzzzz");
 // console.log(JSON.stringify(zilliqa.crypto));
 const client = mqtt.connect("mqtt://test.mosquitto.org");
 
-const URL = "ws://127.0.0.1:9091";
+const URL = "ws://127.0.0.1:9092";
 const web3 = new Web3(URL);
 const { Transaction } = require("ethereumjs-tx");
 
@@ -28,7 +28,7 @@ const ec = new elliptic.ec("secp256k1");
 //Provide the abi and address of the smart contract to get it's object
 const sample = new web3.eth.Contract(
   Sample.abi,
-  Sample.networks["343"].address
+  Sample.networks["443"].address
 );
 // Now we can use this contract instance to call methods, send transactions, etc.
 

@@ -20,7 +20,7 @@ console.log("zzzzzz");
 // console.log(JSON.stringify(zilliqa.crypto));
 const client = mqtt.connect("mqtt://test.mosquitto.org");
 
-const URL = "ws://127.0.0.1:9091";
+const URL = "ws://127.0.0.1:9092";
 const web3 = new Web3(URL);
 const { Transaction } = require("ethereumjs-tx");
 
@@ -29,7 +29,7 @@ const ec = new elliptic.ec("secp256k1");
 //Provide the abi and address of the smart contract to get it's object
 const sample = new web3.eth.Contract(
   Sample.abi,
-  Sample.networks["343"].address
+  Sample.networks["443"].address
 );
 // Now we can use this contract instance to call methods, send transactions, etc.
 
@@ -214,7 +214,7 @@ async function createAggregateSignature(devices) {
 */
 
 const register = async () => {
-  console.log("========= WELCOME TO GATEWAY 1 =========\n");
+  console.log("========= WELCOME TO LBR 1 =========\n");
   var hash = web3.utils.soliditySha3("Register");
   var sign = web3.eth.accounts.sign(hash, process.env.PRIV_KEY);
 
@@ -418,7 +418,7 @@ client.on("message", async (topic, rcv) => {
         status: false,
       };
       let enc_data = encrypt(snd, data.pubKey);
-      console.log(ans.error);
+      //console.log(ans.error);
       client.publish(data.devId, enc_data);
     } else {
       var receipt = await web3.eth.sendSignedTransaction(ans.tx.rawTransaction);
@@ -427,9 +427,8 @@ client.on("message", async (topic, rcv) => {
       //devices.push(data.devId);
       devpubkeys.push(data.pubKey);
       devids.push(data.devId);
-      console.log(data.devId.length);
+      //console.log(data.devId.length);
       //msg.id=data.devId;
-      console.log(msg);
       console.log("Devices under lbr1 :", devids);
       if (devices.length != 0) {
         createAggregateSignature(devices).then((result) => {
@@ -501,7 +500,7 @@ client.on("message", async (topic, rcv) => {
     //nonce is returned as 0 if either gateway is not registered or device is not under this gateway.
     console.log("Retrieving device data...");
     //need to make chnages here for authenticating devices
-    let nonce =1890; //await sample.methods.verifyAggregatedSignature(msg,aggregateSignatures,devids,devpubkeys).call({ from: process.env.address });
+    let nonce = Math.floor(Math.random()*1000);//await sample.methods.verifyAggregatedSignature(msg,aggregateSignatures,devids,devpubkeys).call({ from: process.env.address });
     if (nonce !== "0") {
       //If the device is registered then return the nonce.
       snd = {
@@ -559,7 +558,7 @@ client.on("message", async (topic, rcv) => {
         let flag=await sample.methods.check_device(data.recvId).call({from: process.env.address});
         if(flag==""){
           console.log("!!!!!!!!!!!!!!!!!!warning!!!!!!!!!!!!!!!!");
-          console.log("BGP hijacking attack detected");
+          console.log("Destination device is invalid(possible DDOS attack)");
           console.log("Device not registered-------False Ip detected");
         }
         else{
@@ -585,14 +584,19 @@ client.on("message", async (topic, rcv) => {
           }
           return "";
         }
-        let isvalid="";
+        let isvalid=0;
         for(let i=0;i<=4;i++){
-            console.log("going");
+            
             let id=getKeysByValue(route[i]);
+            if(!id){
+              break;
+            }
+            console.log("verifying lbr",i,"..........");
             console.log(id);
-            isvalid=await sample.methods.check_device(id).call({from: process.env.address});
+            
+            isvalid=await sample.methods.check_lbr(id).call({from: process.env.address});
 
-            if(isvalid==""){
+            if(!isvalid){
               console.log("lbr with id :",id," is not registered");
               console.log("Route is compromised with a malicious router in between.......");
               console.log("Route is invalid........aborting the transfer!");
@@ -604,7 +608,7 @@ client.on("message", async (topic, rcv) => {
         }
       }
       } catch (error) {
-        
+        console.log(error);
       }
     } else {
       console.log("Cannot retrieve nonce...");
